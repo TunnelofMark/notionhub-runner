@@ -255,12 +255,20 @@ jobs:
       - name: 检查同步任务配置
         id: job_config
         if: steps.progress.outcome == 'success'
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$DIDA_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.DIDA_SYNC_PLAN // "lifetime"')
           JOB_ENABLED=true
           SKIP_REASON=""
-          SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          CONFIG_SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          PAYLOAD_SERVICE_OPTIONS=$(jq -cn --arg raw "$RAW_ACTION_PAYLOAD" '($raw | fromjson? // {}) | if (.serviceOptions | type) == "object" then .serviceOptions else null end')
+          if [ "$PAYLOAD_SERVICE_OPTIONS" != "null" ]; then
+            SERVICE_OPTIONS="$PAYLOAD_SERVICE_OPTIONS"
+          else
+            SERVICE_OPTIONS="$CONFIG_SERVICE_OPTIONS"
+          fi
           if ! printf '%s' "$SERVICE_OPTIONS" | jq -e --arg key "task" '(if type == "string" then (try fromjson catch {}) elif type == "object" then . else {} end) | (.enabledStreams // []) as $enabled | ($enabled | length == 0) or ($enabled | index($key) != null)' >/dev/null; then
             JOB_ENABLED=false
             SKIP_REASON="未在同步内容中启用"
@@ -330,6 +338,7 @@ jobs:
           fi
           cd runner
           python -m notionhub_runner sync dida --job task
+
 
       - name: 记录同步任务结果
         if: always() && steps.activation.outputs.enabled == 'true'
@@ -478,12 +487,20 @@ jobs:
       - name: 检查同步番茄配置
         id: job_config
         if: needs.task.outputs.enabled == 'true' && needs.task.result == 'success' && steps.restore.outcome == 'success'
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$DIDA_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.DIDA_SYNC_PLAN // "lifetime"')
           JOB_ENABLED=true
           SKIP_REASON=""
-          SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          CONFIG_SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          PAYLOAD_SERVICE_OPTIONS=$(jq -cn --arg raw "$RAW_ACTION_PAYLOAD" '($raw | fromjson? // {}) | if (.serviceOptions | type) == "object" then .serviceOptions else null end')
+          if [ "$PAYLOAD_SERVICE_OPTIONS" != "null" ]; then
+            SERVICE_OPTIONS="$PAYLOAD_SERVICE_OPTIONS"
+          else
+            SERVICE_OPTIONS="$CONFIG_SERVICE_OPTIONS"
+          fi
           if ! printf '%s' "$SERVICE_OPTIONS" | jq -e --arg key "pomodoro" '(if type == "string" then (try fromjson catch {}) elif type == "object" then . else {} end) | (.enabledStreams // []) as $enabled | ($enabled | length == 0) or ($enabled | index($key) != null)' >/dev/null; then
             JOB_ENABLED=false
             SKIP_REASON="未在同步内容中启用"
@@ -686,6 +703,7 @@ jobs:
           cd runner
           python -m notionhub_runner sync dida --job pomodoro
 
+
       - name: 记录同步番茄结果
         if: always() && needs.task.outputs.enabled == 'true' && needs.task.result == 'success'
         run: |
@@ -833,12 +851,20 @@ jobs:
       - name: 检查同步习惯与打卡配置
         id: job_config
         if: needs.task.outputs.enabled == 'true' && needs.pomodoro.result == 'success' && steps.restore.outcome == 'success'
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$DIDA_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.DIDA_SYNC_PLAN // "lifetime"')
           JOB_ENABLED=true
           SKIP_REASON=""
-          SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          CONFIG_SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          PAYLOAD_SERVICE_OPTIONS=$(jq -cn --arg raw "$RAW_ACTION_PAYLOAD" '($raw | fromjson? // {}) | if (.serviceOptions | type) == "object" then .serviceOptions else null end')
+          if [ "$PAYLOAD_SERVICE_OPTIONS" != "null" ]; then
+            SERVICE_OPTIONS="$PAYLOAD_SERVICE_OPTIONS"
+          else
+            SERVICE_OPTIONS="$CONFIG_SERVICE_OPTIONS"
+          fi
           if ! printf '%s' "$SERVICE_OPTIONS" | jq -e --arg key "habit" '(if type == "string" then (try fromjson catch {}) elif type == "object" then . else {} end) | (.enabledStreams // []) as $enabled | ($enabled | length == 0) or ($enabled | index($key) != null)' >/dev/null; then
             JOB_ENABLED=false
             SKIP_REASON="未在同步内容中启用"
@@ -1041,6 +1067,7 @@ jobs:
           cd runner
           python -m notionhub_runner sync dida --job habit
 
+
       - name: 记录同步习惯与打卡结果
         if: always() && needs.task.outputs.enabled == 'true' && needs.pomodoro.result == 'success'
         run: |
@@ -1188,12 +1215,20 @@ jobs:
       - name: 检查同步倒数日配置
         id: job_config
         if: needs.task.outputs.enabled == 'true' && needs.habit.result == 'success' && steps.restore.outcome == 'success'
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$DIDA_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.DIDA_SYNC_PLAN // "lifetime"')
           JOB_ENABLED=true
           SKIP_REASON=""
-          SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          CONFIG_SERVICE_OPTIONS=$(printf '%s' "$SERVICE_CONFIG" | jq -c '.DIDA_SERVICE_OPTIONS // {}')
+          PAYLOAD_SERVICE_OPTIONS=$(jq -cn --arg raw "$RAW_ACTION_PAYLOAD" '($raw | fromjson? // {}) | if (.serviceOptions | type) == "object" then .serviceOptions else null end')
+          if [ "$PAYLOAD_SERVICE_OPTIONS" != "null" ]; then
+            SERVICE_OPTIONS="$PAYLOAD_SERVICE_OPTIONS"
+          else
+            SERVICE_OPTIONS="$CONFIG_SERVICE_OPTIONS"
+          fi
           if ! printf '%s' "$SERVICE_OPTIONS" | jq -e --arg key "countdown" '(if type == "string" then (try fromjson catch {}) elif type == "object" then . else {} end) | (.enabledStreams // []) as $enabled | ($enabled | length == 0) or ($enabled | index($key) != null)' >/dev/null; then
             JOB_ENABLED=false
             SKIP_REASON="未在同步内容中启用"
@@ -1395,6 +1430,7 @@ jobs:
           fi
           cd runner
           python -m notionhub_runner sync dida --job countdown
+
 
       - name: 记录同步倒数日结果
         if: always() && needs.task.outputs.enabled == 'true' && needs.habit.result == 'success'
